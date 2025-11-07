@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bollywood Tic-Tac-Toe</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter and Merriweather (classic serif) fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Merriweather:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        /* Use Inter as the default font */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* A dark, moody detective gradient */
+            background-color: #111827; /* Fallback */
+            background-image: linear-gradient(to bottom right, #000000, #1f2937, #111827);
+        }
+        /* Classic, readable serif font for dialogues */
+        .font-dialogue {
+            font-family: 'Merriweather', serif;
+            font-style: italic; /* Like a classic thought or comment */
+            line-height: 1.6; /* More readable */
+        }
+        /* Custom class for winning cells - a "highlighter" yellow */
+        .highlight {
+            background-color: #FDE047 !important; /* yellow-300 */
+            color: #111827; /* Dark text for contrast */
+            transform: scale(1.05);
+            transition: all 0.3s ease;
+        }
+        /* Style for O and X */
+        .cell.o {
+            color: #FDE047; /* yellow-300 "searchlight" */
+        }
+        .cell.x {
+            color: #EF4444; /* red-500 "danger" */
+        }
+        /* Ensure the message box doesn't jump */
+        #message-box {
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            /* Dark Glassmorphism effect */
+            background-color: rgba(17, 24, 39, 0.5); /* gray-900/50 */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Subtle pulse animation for the title */
+        @keyframes pulse-text {
+            0%, 100% {
+                opacity: 1;
+                text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+            }
+            50% {
+                opacity: 0.9;
+                text-shadow: 0 0 20px rgba(253, 224, 71, 0.7);
+            }
+        }
+        .animate-text-pulse {
+            animation: pulse-text 4s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen flex items-center justify-center p-4">
+
+    <main class="w-full max-w-md mx-auto p-6 bg-gray-900/30 rounded-2xl shadow-2xl backdrop-blur-lg border border-gray-700/50">
+        <h1 class="text-4xl md:text-5xl font-black text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-red-400 to-yellow-300 animate-text-pulse">
+            Tic-Tac-Toe
+        </h1>
+
+        <!-- Message Box -->
+        <div id="message-box" class="w-full p-4 mb-6 rounded-xl shadow-lg">
+            <!-- Using new font and responsive text size -->
+            <p id="dialogue-text" class="font-dialogue text-lg md:text-xl text-yellow-300"></p>
+        </div>
+
+        <!-- Game Board -->
+        <div id="board" class="grid grid-cols-3 gap-3 w-full max-w-xs mx-auto mb-6">
+            <!-- Cells will be 3x3 -->
+            <div class="cell bg-gray-800/70 aspect-square flex items-center justify-center text-5xl md:text-6xl font-bold rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700/90 shadow-md" data-index="0"></div>
+            <div class="cell bg-gray-800/70 aspect-square flex items-center justify-center text-5xl md:text-6xl font-bold rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700/90 shadow-md" data-index="1"></div>
+            <div class="cell bg-gray-800/70 aspect-square flex items-center justify-center text-5xl md:text-6xl font-bold rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700/90 shadow-md" data-index="2"></div>
+            <div class="cell bg-gray-800/70 aspect-square flex items-center justify-center text-5xl md:text-6xl font-bold rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700/90 shadow-md" data-index="3"></div>
+            <div class="cell bg-gray-800/70 aspect-square flex items-center justify-center text-5xl md:text-6xl font-bold rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700/90 shadow-md" data-index="4"></div>
+            <div class="cell bg-gray-800/70 aspect-square flex items-center justify-center text-5xl md:text-6xl font-bold rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700/90 shadow-md" data-index="5"></div>
+            <div class="cell bg-gray-800/70 aspect-square flex items-center justify-center text-5xl md:text-6xl font-bold rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700/90 shadow-md" data-index="6"></div>
+            <!-- This line is fixed -->
+            <div class="cell bg-gray-800/70 aspect-square flex items-center justify-center text-5xl md:text-6xl font-bold rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700/90 shadow-md" data-index="7"></div>
+            <div class="cell bg-gray-800/70 aspect-square flex items-center justify-center text-5xl md:text-6xl font-bold rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700/90 shadow-md" data-index="8"></div>
+        </div>
+
+        <!-- Restart Button -->
+        <div class="text-center mb-6">
+            <!-- "Confidential" red button -->
+            <button id="restart-button" class="px-8 py-3 bg-gradient-to-r from-red-600 to-orange-500 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:from-red-700 hover:to-orange-600 transform hover:scale-105">
+                Restart Game
+            </button>
+        </div>
+
+        <!-- Prize Links (Hidden) -->
+        <div class="text-center">
+            <a id="prize-link" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank"
+               class="hidden mt-6 mx-2 px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:from-green-600 hover:to-emerald-600 animate-pulse">
+                Prize 1 🤫
+            </a>
+            <a id="prize-link-2" href="https://www.google.com/search?q=a+truly+amazing+person" target="_blank"
+               class="hidden mt-6 mx-2 px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:from-purple-600 hover:to-indigo-600 animate-pulse">
+                Prize 2 😉
+            </a>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cells = document.querySelectorAll('.cell');
+            const messageBox = document.getElementById('dialogue-text');
+            const restartButton = document.getElementById('restart-button');
+            const prizeLink = document.getElementById('prize-link');
+            const prizeLink2 = document.getElementById('prize-link-2');
+
+            const player = 'O';
+            const computer = 'X';
+            let boardState = ['', '', '', '', '', '', '', '', ''];
+            let isGameActive = true;
+            let currentPlayer = player; // User 'O' starts
+
+            const winningConditions = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                [0, 4, 8], [2, 4, 6]  // Diagonals
+            ];
+
+            const dialogues = {
+                start: "Chaliye shuru karte hain... 😉 Pehli chaal aapki. Show me that brilliant first move.",
+                turn: [
+                    // Funny / Teasing
+                    "Uthale re baba... itna accha move? 😘😜",
+                    "Hmm, 'X' yahan... 'Kuch toh gadbad hai, Daya!' 🧐 ...My game plan, I mean. 😂",
+                    "Mera 'X' move... 'How's the josh?'... High, sir? 😉",
+                    "Ye chaal... 'Confusion hi confusion hai, solution kuch pata nahi.'... Mere liye! 😅",
+                    
+                    // Flirty / Charming
+                    "Itni 'O'-some chaal... 'All is well' nahi lag raha mere liye! 😅",
+                    "Waah! 'Wahhhh!! itna sahi kese ho sakte ho!! ❤️👌",
+                    "Aur Yaha me pigal gaya......🫠 what a Move 💃🏻",
+                    "Hmm... 'Socha na tha' aap yeh move chaloge. ✨",
+
+                    // Respectful / Smart
+                    "Waah! 'Dimag ki batti' jala di... nice move! 😍💡",
+                    "Accha move... 'Main 'O'-verthink toh nahi kar raha?'... You're good at this. 🫠🤔",
+                    "Ekdum 'O'-riginal! 'Not bad... not bad at all.' 😉"
+                ],
+                win: "JEET gaye! 🏆'7 Crore......Ji haan 7 Crore'! 😉 Ye lijiye aapka inaam!",
+                lose: "Oofo, 'Lekin....Picture abhi baaki hai, mere dost!'... A new game? 'Haar ke jeetne waale ko...' well, you know. 😉",
+                draw: "Tie! 'Topper - Topper ke beech me kadi takkar' 😂 We're both too good at this! Phir se ho jaaye?"
+            };
+
+            // --- Game Functions ---
+
+            function initializeGame() {
+                boardState = ['', '', '', '', '', '', '', '', ''];
+                isGameActive = true;
+                currentPlayer = player;
+                prizeLink.classList.add('hidden');
+                prizeLink2.classList.add('hidden');
+
+                cells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('o', 'x', 'highlight');
+                });
+
+                setDialogue('start');
+            }
+
+            function setDialogue(type) {
+                if (type === 'turn') {
+                    const randomIndex = Math.floor(Math.random() * dialogues.turn.length);
+                    messageBox.textContent = dialogues.turn[randomIndex];
+                } else {
+                    messageBox.textContent = dialogues[type];
+                }
+            }
+
+            function handleCellClick(event) {
+                const clickedCell = event.target;
+                const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+                // Only allow click if cell is empty, game is active, and it's player's turn
+                if (boardState[clickedCellIndex] !== '' || !isGameActive || currentPlayer !== player) {
+                    return;
+                }
+
+                // Player's move
+                updateBoard(clickedCellIndex, player);
+
+                if (checkGameResult()) {
+                    return; // Game is over
+                }
+
+                // Switch to computer's turn
+                currentPlayer = computer;
+                // Add a small delay for AI to "think"
+                setTimeout(computerMove, 700);
+            }
+
+            function computerMove() {
+                const bestMove = findBestMove();
+                updateBoard(bestMove, computer);
+
+                if (checkGameResult()) {
+                    return; // Game is over
+                }
+
+                // Switch back to player's turn
+                currentPlayer = player;
+                setDialogue('turn');
+            }
+
+            function updateBoard(index, turn) {
+                boardState[index] = turn;
+                const cell = cells[index];
+                cell.textContent = turn;
+                cell.classList.add(turn.toLowerCase());
+            }
+
+            function checkGameResult() {
+                let roundWon = false;
+                let winningLine = [];
+
+                for (let i = 0; i < winningConditions.length; i++) {
+                    const [a, b, c] = winningConditions[i];
+                    if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+                        roundWon = true;
+                        winningLine = [a, b, c];
+                        break;
+                    }
+                }
+
+                if (roundWon) {
+                    isGameActive = false;
+                    highlightWinningCells(winningLine);
+                    if (boardState[winningLine[0]] === player) {
+                        setDialogue('win');
+                        prizeLink.classList.remove('hidden');
+                        prizeLink2.classList.remove('hidden');
+                    } else {
+                        setDialogue('lose');
+                    }
+                    return true;
+                }
+
+                if (!boardState.includes('')) {
+                    isGameActive = false;
+                    setDialogue('draw');
+                    return true;
+                }
+
+                return false;
+            }
+
+            function highlightWinningCells(line) {
+                line.forEach(index => {
+                    cells[index].classList.add('highlight');
+                });
+            }
+
+            // --- AI Logic (Hard) ---
+
+            function findBestMove() {
+                // 1. Check if computer can win
+                for (let i = 0; i < 9; i++) {
+                    if (boardState[i] === '') {
+                        boardState[i] = computer;
+                        if (isWinningMove(computer)) {
+                            boardState[i] = ''; // Reset
+                            return i;
+                        }
+                        boardState[i] = ''; // Reset
+                    }
+                }
+
+                // 2. Check if player can win (and block)
+                for (let i = 0; i < 9; i++) {
+                    if (boardState[i] === '') {
+                        boardState[i] = player;
+                        if (isWinningMove(player)) {
+                            boardState[i] = ''; // Reset
+                            return i; // Block
+                        }
+                        boardState[i] = ''; // Reset
+                    }
+                }
+
+                // 3. Take center if available
+                if (boardState[4] === '') {
+                    return 4;
+                }
+
+                // 4. Take opposite corner
+                if (boardState[0] === player && boardState[8] === '') return 8;
+                if (boardState[8] === player && boardState[0] === '') return 0;
+                if (boardState[2] === player && boardState[6] === '') return 6;
+                if (boardState[6] === player && boardState[2] === '') return 2;
+
+                // 5. Take an empty corner
+                const corners = [0, 2, 6, 8];
+                for (const corner of corners) {
+                    if (boardState[corner] === '') {
+                        return corner;
+                    }
+                }
+
+                // 6. Take an empty side
+                const sides = [1, 3, 5, 7];
+                for (const side of sides) {
+                    if (boardState[side] === '') {
+                        return side;
+                    }
+                }
+                
+                // This should not be reached if logic is correct, but as a fallback
+                return boardState.indexOf('');
+            }
+
+            function isWinningMove(turn) {
+                for (const condition of winningConditions) {
+                    const [a, b, c] = condition;
+                    if (boardState[a] === turn && boardState[b] === turn && boardState[c] === turn) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+
+            // --- Event Listeners ---
+            cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+            restartButton.addEventListener('click', initializeGame);
+
+            // Start the game!
+            initializeGame();
+        });
+    </script>
+</body>
+</html>
